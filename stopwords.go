@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strings"
 
-	"gopkg.in/fatih/set.v0"
+	"github.com/fatih/set"
 )
 
 var punctuationRegex = regexp.MustCompile(`[^\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nd}\p{Pc}\s]`)
@@ -21,7 +21,7 @@ func NewStopwords() StopWords {
 	cachedStopWords := make(map[string]*set.Set)
 	for lang, stopwords := range sw {
 		lines := strings.Split(stopwords, "\n")
-		cachedStopWords[lang] = set.New()
+		cachedStopWords[lang] = set.New(set.ThreadSafe).(*set.Set)
 		for _, line := range lines {
 			if strings.HasPrefix(line, "#") {
 				continue
@@ -35,33 +35,6 @@ func NewStopwords() StopWords {
 	}
 }
 
-/*
-func NewStopwords(path string) StopWords {
-	cachedStopWords := make(map[string]*set.Set)
-	files, err := ioutil.ReadDir(path)
-	if err != nil {
-		panic(err.Error())
-	}
-	for _, file := range files {
-		name := strings.Replace(file.Name(), ".txt", "", -1)
-		name = strings.Replace(name, "stopwords-", "", -1)
-		name = strings.ToLower(name)
-
-		stops := set.New()
-		lines := ReadLinesOfFile(path + "/" + file.Name())
-		for _, line := range lines {
-			line = strings.Trim(line, " ")
-			stops.Add(line)
-		}
-		cachedStopWords[name] = stops
-	}
-
-	return StopWords{
-		cachedStopWords: cachedStopWords,
-	}
-}
-*/
-
 func (stop *StopWords) removePunctuation(text string) string {
 	return punctuationRegex.ReplaceAllString(text, "")
 }
@@ -71,7 +44,7 @@ func (stop *StopWords) stopWordsCount(lang string, text string) wordStats {
 		return wordStats{}
 	}
 	ws := wordStats{}
-	stopWords := set.New()
+	stopWords := set.New(set.ThreadSafe).(*set.Set)
 	text = strings.ToLower(text)
 	items := strings.Split(text, " ")
 	stops := stop.cachedStopWords[lang]

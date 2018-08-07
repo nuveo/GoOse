@@ -1,10 +1,11 @@
 package goose
 
 import (
-	"github.com/PuerkitoBio/goquery"
-	"gopkg.in/fatih/set.v0"
 	"strconv"
 	"strings"
+
+	"github.com/PuerkitoBio/goquery"
+	"github.com/fatih/set"
 )
 
 // VideoExtractor can extract the main video from an HTML page
@@ -26,9 +27,11 @@ type video struct {
 
 // NewVideoExtractor returns a new instance of a HTML video extractor
 func NewVideoExtractor() VideoExtractor {
+	cord := set.New(set.ThreadSafe).(*set.Set)
+	mov := set.New(set.ThreadSafe).(*set.Set)
 	return VideoExtractor{
-		candidates: set.New(),
-		movies:     set.New(),
+		candidates: cord,
+		movies:     mov,
 	}
 }
 
